@@ -38,7 +38,7 @@ RUN cmake --build build --target llama-server -j"$(nproc)"
 FROM golang:bookworm AS llama-swap-build
 
 # renovate: datasource=github-releases depName=mostlygeek/llama-swap versioning=regex:^v(?<major>\d+)$
-ARG LLAMA_SWAP_REF=v195
+ARG LLAMA_SWAP_REF=v199
 ARG TARGETARCH
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
