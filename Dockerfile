@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.21
+# syntax=docker/dockerfile:1.23
 FROM debian:stable-slim AS build
 
 ARG DEBIAN_FRONTEND=noninteractive
