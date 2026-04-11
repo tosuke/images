@@ -3,7 +3,7 @@ FROM debian:stable-slim AS build
 
 ARG DEBIAN_FRONTEND=noninteractive
 # renovate: datasource=github-releases depName=ggml-org/llama.cpp versioning=regex:^b(?<major>\d+)$
-ARG LLAMA_CPP_REF=b8722
+ARG LLAMA_CPP_REF=b8753
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
