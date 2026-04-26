@@ -35,7 +35,7 @@ RUN cmake -S . -B build -G Ninja \
 	  -DLLAMA_LLGUIDANCE=ON
 RUN cmake --build build --target llama-server -j"$(nproc)"
 
-FROM golang:bookworm AS llama-swap-build
+FROM golang:trixie AS llama-swap-build
 
 # renovate: datasource=github-releases depName=mostlygeek/llama-swap versioning=regex:^v(?<major>\d+)$
 ARG LLAMA_SWAP_REF=v195
