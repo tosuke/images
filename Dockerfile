@@ -14,9 +14,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         ccache \
         cmake \
         git \
-        glslang-tools \
         libssl-dev \
-        nodejs \
         npm \
         rust-all \
         spirv-headers \
@@ -53,7 +51,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     && apt-get install -y --no-install-recommends \
         git \
         make \
-        nodejs \
         npm
 
 WORKDIR /src
