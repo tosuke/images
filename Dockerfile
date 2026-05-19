@@ -14,7 +14,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         ccache \
         cmake \
         git \
-		rust-all \
+        libssl-dev \
+        npm \
+        rust-all \
+        spirv-headers \
         glslc \
         libvulkan-dev \
         ninja-build \
@@ -32,7 +35,8 @@ RUN cmake -S . -B build -G Ninja \
       -DGGML_VULKAN=ON \
       -DLLAMA_BUILD_BORINGSSL=ON \
       -DLLAMA_BUILD_SERVER=ON \
-	  -DLLAMA_LLGUIDANCE=ON
+      -DLLAMA_BUILD_UI=ON \
+      -DLLAMA_LLGUIDANCE=ON
 RUN cmake --build build --target llama-server -j"$(nproc)"
 
 FROM golang:trixie AS llama-swap-build
@@ -47,7 +51,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     && apt-get install -y --no-install-recommends \
         git \
         make \
-        nodejs \
         npm
 
 WORKDIR /src
