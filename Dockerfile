@@ -33,9 +33,9 @@ RUN cmake -S . -B build -G Ninja \
       -DCMAKE_C_COMPILER_LAUNCHER=ccache \
       -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
       -DGGML_VULKAN=ON \
-      -DLLAMA_BUILD_BORINGSSL=OFF \
+      -DLLAMA_BUILD_BORINGSSL=ON \
       -DLLAMA_BUILD_SERVER=ON \
-      -DLLAMA_BUILD_UI=OFF \
+      -DLLAMA_BUILD_UI=ON \
       -DLLAMA_LLGUIDANCE=ON
 RUN cmake --build build --target llama-server -j"$(nproc)"
 
