@@ -16,6 +16,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         git \
         glslang-tools \
         libssl-dev \
+        nodejs \
+        npm \
         rust-all \
         spirv-headers \
         glslc \
