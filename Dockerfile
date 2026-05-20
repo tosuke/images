@@ -59,6 +59,8 @@ WORKDIR /src/llama.cpp
 RUN cmake -S . -B build -G Ninja \
       -DCMAKE_BUILD_TYPE=Release \
       -DBUILD_SHARED_LIBS=OFF \
+      -DCMAKE_C_COMPILER_LAUNCHER=sccache \
+      -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
       -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=mold \
       -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=mold \
       -DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=mold \
