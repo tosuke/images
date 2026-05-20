@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -16,6 +17,40 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Prepare Cache Path and Key
+        id: cache
+        run: |
+          set -eux
+          VALKEY_CACHE_DIR="${GITHUB_WORKSPACE}/.cache/valkey"
+          mkdir -p "${VALKEY_CACHE_DIR}"
+          echo "valkey-dir=${GITHUB_WORKSPACE}/.cache/valkey" >> "${GITHUB_OUTPUT}"
+          echo "valkey-key-prefix=valkey-sccache-v0-${RUNNER_OS}-${RUNNER_ARCH}-" >> "${GITHUB_OUTPUT}"
+      - name: Restore Valkey snapshot
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ${{ steps.cache.outputs.valkey-dir }}
+          key: ${{ steps.cache.outputs.valkey-key-prefix }}${{ github.sha }}
+          restore-keys: |
+            ${{ steps.cache.outputs.valkey-key-prefix }}
+
+      - name: Start Valkey
+        id: valkey
+        env:
+          VALKEY_CACHE_DIR: ${{ steps.cache.outputs.valkey-dir }}
+        run: |
+          set -eux
+          mkdir -p "${VALKEY_CACHE_DIR}"
+          id=$(docker run -d \
+            --name valkey \
+            -v "${VALKEY_CACHE_DIR}:/data" \
+            valkey/valkey:8-alpine \
+            valkey-server \
+              --dir /data \
+              --dbfilename dump.rdb \
+              --save 60 1 \
+              --protected-mode no)
+          echo "endpoint=$(docker inspect -f 'redis://{{.NetworkSettings.IPAddress}}:6379' "$id")" >> "${GITHUB_OUTPUT}"
 
       - name: Log in to GHCR
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
@@ -41,8 +76,29 @@ jobs:
         with:
           context: .
           platforms: linux/amd64
-          push: true
+          push: ${{ github.ref == 'refs/heads/main' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            SCCACHE_REDIS_ENDPOINT=${{ steps.valkey.outputs.endpoint }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: ${{ github.ref == 'refs/heads/main' && 'type=gha,mode=max' || '' }}
+
+      - name: Flush and stop Valkey
+        if: always()
+        run: |
+          set -eux
+          if docker ps -a --format '{{.Names}}' | grep -Fx valkey >/dev/null; then
+            docker exec valkey valkey-cli -h 127.0.0.1 save || true
+            docker stop valkey || true
+            docker rm valkey || true
+          fi
+          sudo chown -R "$(id -u):$(id -g)" "${{ steps.cache.outputs.valkey-dir }}" || true
+          chmod -R u+rwX "${{ steps.cache.outputs.valkey-dir }}" || true
+
+      - name: Save Valkey snapshot
+        if: github.ref == 'refs/heads/main' && success()
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ${{ steps.cache.outputs.valkey-dir }}
+          key: ${{ steps.cache.outputs.valkey-key-prefix }}${{ github.sha }}
