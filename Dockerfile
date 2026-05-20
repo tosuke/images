@@ -24,6 +24,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         curl \
         git \
         libssl-dev \
+        mold \
         npm \
         rust-all \
         spirv-headers \
@@ -58,6 +59,9 @@ WORKDIR /src/llama.cpp
 RUN cmake -S . -B build -G Ninja \
       -DCMAKE_BUILD_TYPE=Release \
       -DBUILD_SHARED_LIBS=OFF \
+      -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=mold \
+      -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=mold \
+      -DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=mold \
       -DGGML_VULKAN=ON \
       -DLLAMA_BUILD_BORINGSSL=ON \
       -DLLAMA_BUILD_SERVER=ON \
