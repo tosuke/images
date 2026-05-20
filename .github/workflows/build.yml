@@ -42,7 +42,6 @@ jobs:
           mkdir -p "${VALKEY_CACHE_DIR}"
           id=$(docker run -d \
             --name valkey \
-            -p 6379:6379 \
             -v "${VALKEY_CACHE_DIR}:/data" \
             valkey/valkey:8-alpine \
             valkey-server \
