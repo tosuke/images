@@ -115,14 +115,18 @@ RUN --mount=type=cache,target=/go/pkg/mod,sharing=locked \
 FROM debian:trixie-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
+# Pull Mesa from trixie-backports while keeping the rest of runtime on trixie.
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
-    apt-get update \
+    echo 'deb http://deb.debian.org/debian trixie-backports main' > /etc/apt/sources.list.d/trixie-backports.list \
+    && apt-get update \
     && apt-get install -y --no-install-recommends \
         ca-certificates \
         libgomp1 \
         libvulkan1 \
-        mesa-vulkan-drivers
+    && apt-get install -y --no-install-recommends -t trixie-backports \
+        mesa-vulkan-drivers \
+    && rm -f /etc/apt/sources.list.d/trixie-backports.list
 
 COPY --from=build /src/llama.cpp/build/bin/llama-server /usr/local/bin/llama-server
 COPY --from=llama-swap-build /out/llama-swap /usr/local/bin/llama-swap
