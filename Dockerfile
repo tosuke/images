@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # renovate: datasource=github-releases depName=ggml-org/llama.cpp versioning=regex:^b(?<major>\d+)$
-ARG LLAMA_CPP_REF=b9263
+ARG LLAMA_CPP_REF=b9276
 
 # renovate: datasource=github-releases depName=mostlygeek/llama-swap versioning=regex:^v(?<major>\d+)$
 ARG LLAMA_SWAP_REF=v216
