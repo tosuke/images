@@ -4,7 +4,7 @@
 ARG LLAMA_CPP_REF=b9276
 
 # renovate: datasource=github-releases depName=mostlygeek/llama-swap versioning=regex:^v(?<major>\d+)$
-ARG LLAMA_SWAP_REF=v216
+ARG LLAMA_SWAP_REF=v217
 
 ARG SCCACHE_REDIS_ENDPOINT=
 ARG SCCACHE_LOG=info
