@@ -11,6 +11,10 @@ permissions:
   contents: read
   packages: write
 
+env:
+  VALKEY_MAXMEMORY: 256mb
+  VALKEY_MAXMEMORY_POLICY: allkeys-lfu
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -48,6 +52,8 @@ jobs:
             valkey-server \
               --dir /data \
               --dbfilename dump.rdb \
+              --maxmemory "${VALKEY_MAXMEMORY}" \
+              --maxmemory-policy "${VALKEY_MAXMEMORY_POLICY}" \
               --save 60 1 \
               --protected-mode no)
           echo "endpoint=$(docker inspect -f 'redis://{{.NetworkSettings.IPAddress}}:6379' "$id")" >> "${GITHUB_OUTPUT}"
@@ -101,6 +107,7 @@ jobs:
         run: |
           set -eux
           if docker ps -a --format '{{.Names}}' | grep -Fx valkey >/dev/null; then
+            docker exec valkey valkey-cli -h 127.0.0.1 info memory || true
             docker exec valkey valkey-cli -h 127.0.0.1 save || true
             docker stop valkey || true
             docker rm valkey || true
