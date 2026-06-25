@@ -55,7 +55,7 @@ WORKDIR /src/llama.cpp
 
 RUN cmake -S . -B build -G Ninja \
       -DCMAKE_BUILD_TYPE=Release \
-      -DBUILD_SHARED_LIBS=OFF \
+      -DBUILD_SHARED_LIBS=ON \
       -DCMAKE_C_COMPILER_LAUNCHER=sccache \
       -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
       -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=mold \
@@ -79,7 +79,7 @@ sccache --start-server
 sccache --show-stats
 
 export RUSTC_WRAPPER=$(which sccache)
-cmake --build build --target llama-server llama-cli -j"$(nproc)"
+cmake --build build --target llama-server llama-app -j"$(nproc)"
 
 sccache --show-stats
 sccache --stop-server
@@ -97,11 +97,17 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         ca-certificates \
         libgomp1 \
         libvulkan1 \
+        libxext6 \
+        libegl1 \
     && apt-get install -y --no-install-recommends -t trixie-backports \
         mesa-vulkan-drivers \
     && rm -f /etc/apt/sources.list.d/trixie-backports.list
 
 COPY --from=build /src/llama.cpp/build/bin/llama-server /usr/local/bin/llama-server
+COPY --from=build /src/llama.cpp/build/bin/llama /usr/local/bin/llama
+RUN --mount=type=bind,from=build,source=/src/llama.cpp/build/bin,target=/tmp/llama-build \
+    cp -a /tmp/llama-build/*.so* /usr/local/lib/ \
+    && ldconfig
 
 EXPOSE 8080
 ENTRYPOINT ["/usr/local/bin/llama-server"]
